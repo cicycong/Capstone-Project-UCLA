@@ -1,0 +1,122 @@
+---
+title: "Final Project"
+author: "Chang Cong, Hanlin Liu, Qiushi Wang"
+date: "2019/6/3"
+output:
+  pdf_document: default
+  html_document:
+    df_print: paged
+---
+```{r}
+library(knitr)
+library(ggplot2)
+library(plyr)
+library(dplyr)
+library(corrplot)
+library(caret)
+library(gridExtra)
+library(scales)
+library(Rmisc)
+library(ggrepel)
+library(randomForest)
+library(psych)
+library(xgboost)
+library(ggplot2) 
+library(readr)
+library(gplots)
+library(repr)
+library(MASS)
+```
+
+```{r}
+setwd("~/Desktop/ChangCongCapstone/dataset")
+library(readr)
+data <- read.csv("train.csv",stringsAsFactors = F)
+set.seed(111)
+
+```
+
+```{r}
+var_name <- names(data)
+select_var <- c('MSZoning','Utilities','Neighborhood','BldgType','HouseStyle','OverallQual','OverallCond','YearBuilt','ExterQual','ExterCond',
+                'BsmtQual','BsmtCond','TotalBsmtSF','Heating','HeatingQC', 
+                'CentralAir','Electrical','GrLivArea','BedroomAbvGr','KitchenAbvGr','KitchenQual','TotRmsAbvGrd','Functional','Fireplaces','FireplaceQu',
+               'GarageArea','GarageQual','GarageCond','OpenPorchSF','PoolArea',
+                'Fence','MoSold','YrSold','SaleType','SaleCondition','SalePrice')
+select_train <- data[,select_var]
+select_train$logPrice <- log(select_train$SalePrice)
+
+train.index <- sample(row.names(select_train), 0.6*dim(data)[1])  
+valid.index <- setdiff(row.names(select_train), train.index)  
+train.df <- select_train[train.index, ]
+valid.df <- select_train[valid.index, ]
+write.csv(train.df, file = "trainselected.csv")
+write.csv(valid.df, file = "validselected.csv")
+```
+
+
+```{r}
+summary(select_train$SalePrice)
+
+ggplot(data=select_train[!is.na(select_train$SalePrice),], aes(x=SalePrice)) +
+        geom_histogram(fill="blue", binwidth = 10000) +
+        scale_x_continuous(breaks= seq(0, 800000, by=100000), labels = comma)
+
+ggplot(select_train, aes(x = logPrice, fill = ..count..)) +
+  geom_histogram(binwidth = 0.05) +
+  ggtitle("Histogram of log SalePrice") +
+  ylab("Count of houses") +
+  xlab("Housing Price") + 
+  theme(plot.title = element_text(hjust = 0.5))
+```
+
+
+```{r}
+cor_numVar <- cor(select_train[,-37], use="pairwise.complete.obs")
+#sort on decreasing correlations with SalePrice
+cor_sorted <- as.matrix(sort(cor_numVar[,'SalePrice'], decreasing = TRUE))
+ #select only high corelations
+CorHigh <- names(which(apply(cor_sorted, 1, function(x) abs(x)>0.6)))
+cor_numVar <- cor_numVar[CorHigh, CorHigh]
+corrplot.mixed(cor_numVar, tl.col="black", tl.pos = "lt")
+```
+
+```{r}
+ggplot(data=select_train[!is.na(select_train$SalePrice),], aes(x=factor(OverallQual), y=SalePrice))+
+        geom_boxplot(col='blue') + labs(x='Overall Quality') +
+        scale_y_continuous(breaks= seq(0, 800000, by=100000), labels = comma)
+```
+
+```{r}
+ggplot(data=select_train[!is.na(select_train$SalePrice),], aes(x=GrLivArea, y=SalePrice))+
+        geom_point(col='blue') + geom_smooth(method = "lm", se=FALSE, color="black", aes(group=1)) +
+        scale_y_continuous(breaks= seq(0, 800000, by=100000), labels = comma) 
+```
+
+```{r}
+ggplot(data=select_train[!is.na(select_train$SalePrice),], aes(x=GarageArea, y=SalePrice))+
+        geom_point(col='blue') + geom_smooth(method = "lm", se=FALSE, color="black", aes(group=1)) +
+        scale_y_continuous(breaks= seq(0, 800000, by=100000), labels = comma) 
+```
+
+Linear Regression
+
+```{r}
+linreg <- lm(logPrice~.-SalePrice, data = train.df)
+summary(linreg)
+backward<-stepAIC(linreg,direction='backward',trace=FALSE)
+summary(backward)
+```
+
+```{r}
+library(forecast)
+library(ModelMetrics)
+#use predict() to make prediction on a new set
+pred1 <- predict(backward,valid.df,type = "response")
+residuals <-valid.df$logPrice - pred1
+linreg_pred <- data.frame("Predicted" = pred1, "Actual" = valid.df$logPrice, "Residual" = residuals)
+accuracy(pred1, valid.df$logPrice)
+rmse(pred1, valid.df$logPrice)
+```
+
+
