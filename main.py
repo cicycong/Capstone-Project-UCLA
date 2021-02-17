@@ -161,6 +161,7 @@ def runNN():
             testLossValue = sess.run(loss, feed_dict={label: testLabel, data: testData})
             print("iteration: ", e, " train loss = ", math.sqrt(trainLossValue), "  test loss = ", math.sqrt(testLossValue))
 
+#Random Forest
 def runRFR():
     trainData, trainLabel, testData, testLabel = loadData()
     RFR = RandomForestRegressor(n_estimators=1000)
