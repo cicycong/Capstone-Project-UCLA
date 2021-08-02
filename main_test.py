@@ -65,42 +65,37 @@ def loadData():
 
     # drop all features which has less than 1400 non-NA data.
     # drop id feature
-    df = df.drop(["ID"], axis=1)
+    df = df.drop(["Id"], axis=1)
 
-    data = pd.DataFrame()
 
-    feature = list(df.columns)
 
     #missing value imputation
-    for f in feature:
-        if dataset[f].dtype == "object":
-            M = dictGen(dataset[f].unique())
-            data[f] = dataset[f].map(M).astype("float64")
-        elif dataset[f].dtype == "int64":
+    for f in df.columns:
+        if df[f].dtype == "object":
+            df[f] = df[f].fillna(df[f].value_counts().index[0], inplace=False)
+        elif df[f].dtype == "int64":
             # replace nan with average
-            if dataset[f].isna().any():
-                average = dataset[f].mean()
-                dataset[f] = dataset[f].fillna(average, inplace=False)
-            data[f] = dataset[f].astype("float64")
-        elif dataset[f].dtype == "float64":
+            if df[f].isna().any():
+                df[f] = df[f].fillna(df[f].median(), inplace=False)
+            df[f] = df[f].astype("float64")
+        elif df[f].dtype == "float64":
             # replace nan with average
-            if dataset[f].isna().any():
-                average = dataset[f].mean()
-                dataset[f] = dataset[f].fillna(average, inplace=False)
+            if df[f].isna().any():
+                df[f] = df[f].fillna(df[f].median(), inplace=False)
         else:
             print("Warning!")
 
-    data.to_csv(path_or_buf="dataset/out.csv")
+    df.to_csv(path_or_buf="dataset/out.csv")
 
     # extract label
-    label = data['SalePrice']
-    data = data.drop(["SalePrice"],axis=1)
+    label = df['SalePrice']
+    data = df.drop(["SalePrice"],axis=1)
 
     # print the chi scores of each feature
     # select the best features
     selection = univariateFeatureSelection(label, data)
 
-    data = data[selection]
+    df = df[selection]
 
     # plot the importance of features
     # featureImportance(label, data)
