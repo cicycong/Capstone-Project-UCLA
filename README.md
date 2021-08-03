@@ -2,7 +2,7 @@
 
 Master of Applied Economics Capstone Project in UCLA
 
-<h1 align="center">NLP_Sentiment_Analysis</h1>
+<h1 align="center">House Price Prediction</h1>
 
 ## Description
 The task of this project is to build a regression model to predict the house price in IOWA using the attributes of the house. The training dataset contains 1460 observations and 81 variables including numeric variables and categorical variables. The training dataset is used to train the model, interpret the model. Then the chosen model is applied to the testing data and made predictions that are ready to be submitted. The evaluation metric of the models is RMSE. 
