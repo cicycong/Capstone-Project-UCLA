@@ -1,6 +1,9 @@
 import pandas as pd
-import numpy as np
 from math import sqrt
+import tensorflow as tf
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Dense, Dropout
+
 from sklearn.feature_selection import RFE
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.linear_model import LinearRegression
@@ -153,6 +156,51 @@ def GradientBoost(x_train,x_test,y_train,y_test):
 
     print("The RMSE is :", rmse)
 
+#
+#
+# def nn_model(lr=0.01):
+#     '''
+#
+#     Neural Network Model
+#     '''
+#     model = Sequential()
+#
+#     model.add(Dense(units=1000, activation='relu'))
+#     model.add(Dropout(0.5))
+#
+#     model.add(Dense(units=50, activation='relu'))
+#     model.add(Dropout(0.5))
+#
+#     model.add(Dense(units=3, activation='softmax'))
+#
+#     opt=tf.keras.optimizers.Adam(learning_rate=0.01)
+#
+#     model.compile(optimizer='rmsprop',
+#                   loss='mse',
+#                   metrics=['mse'])
+#
+#     return model
+#
+#
+# def buildTensorGraph(inputData):
+#     tf.set_random_seed(712)
+#
+#     d1 = 200
+#     w1 = tf.Variable(tf.random_normal([numberOfFeatures, d1], dtype=tf.float64), dtype=tf.float64)
+#     b1 = tf.Variable(tf.zeros([d1], dtype=tf.float64), dtype=tf.float64)
+#     l1 = tf.add(tf.matmul(inputData, w1), b1)
+#
+#     d2 = 1
+#     w2 = tf.Variable(tf.random_normal([d1, d2], dtype=tf.float64), dtype=tf.float64)
+#     b2 = tf.Variable(tf.zeros([d2], dtype=tf.float64), dtype=tf.float64)
+#     l2 = tf.add(tf.matmul(l1, w2), b2)
+#
+#     d3 = 1
+#     w3 = tf.Variable(tf.random_normal([d2, d3], dtype=tf.float64), dtype=tf.float64)
+#     b3 = tf.Variable(tf.zeros([d3], dtype=tf.float64), dtype=tf.float64)
+#     l3 = tf.nn.relu(tf.add(tf.matmul(l2, w3), b3))
+#     return l2, [w1, b1, w2, b2]
+
 
 def runRFR():
     df = loadData(path)
@@ -162,4 +210,55 @@ def runRFR():
     RandomForest(x_train,x_test,y_train,y_test)
 
 
+
+#
+#
+# def runNN2():
+#     df = loadData(path)
+#     label, data=preprocessing(df)
+#     selecteddf=feature_selection_tree(label, data)
+#     x_train,x_test,y_train,y_test=train_test(selecteddf, label)
+#     model = nn_model()
+#     model.fit(x=X_train, y=y_train, batch_size=20, epochs=10, verbose=1)
+#     y_prednn = model.predict(X_test)
+#
+#     rmse = sqrt(mean_squared_error(y_prednn, y_test))
+#
+#     print("The RMSE is :", rmse)
+#
+# def runNN():
+#
+#
+#     df = loadData(path)
+#     label, data=preprocessing(df)
+#     selecteddf=feature_selection_tree(label, data)
+#     x_train, x_test, y_train, y_test = train_test(selecteddf, label)
+#
+#
+#     data = tf.placeholder(dtype=tf.float64, shape=(None, numberOfFeatures))
+#     label = tf.placeholder(dtype=tf.float64, shape=(None, 1))
+#
+#     output, param = buildTensorGraph(data)
+#
+#     loss = tf.losses.mean_squared_error(labels=label, predictions=output)
+#
+#     optimizer = tf.train.AdamOptimizer(learning_rate=learningRate).minimize(loss)
+#
+#     init_op = tf.global_variables_initializer()
+#     with tf.Session() as sess:
+#         sess.run(init_op)
+#         for e in range(epoch):
+#             # pick batch randomly
+#             x_train, x_test = shuffle(x_train, x_test)
+#
+#             for b in range(0, int(x_train.shape[0] / batchSize)):
+#                 batchData = x_train.iloc[b * batchSize:(b + 1) * batchSize, :]
+#                 batchTarget = x_test.iloc[b * batchSize:(b + 1) * batchSize]
+#                 # run optimizer
+#                 sess.run(optimizer, feed_dict={label: batchTarget, data: batchData})
+#             trainLossValue = sess.run(loss, feed_dict={label: x_test, data: x_train})
+#             testLossValue = sess.run(loss, feed_dict={label: y_test, data: testData})
+#             print("iteration: ", e, " train loss = ", math.sqrt(trainLossValue), "  test loss = ", math.sqrt(testLossValue))
+#
+# # runNN2()
 runRFR()

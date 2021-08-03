@@ -9,7 +9,6 @@ from sklearn.feature_selection import RFE
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.linear_model import LinearRegression
 from sklearn.model_selection import train_test_split
-import matplotlib.pyplot as plt
 from sklearn.ensemble import ExtraTreesClassifier
 
 learningRate = 0.01
@@ -60,7 +59,7 @@ def AICFeatureSelection(label, data):
 
 def loadData():
     # https://www.kaggle.com/c/house-prices-advanced-regression-techniques/overview
-    house_price = pd.read_csv("data/train.csv")
+    house_price = pd.read_csv("/Users/chong/Documents/GitHub/Capstone-Project-UCLA/data/train.csv")
     df = pd.DataFrame(house_price)
 
     # drop all features which has less than 1400 non-NA data.
@@ -169,6 +168,6 @@ def runRFR():
     testPred = RFR.predict(testData)
     print(np.sum(testPred - testLabel) / len(testLabel))
 
-runRFR()
+runNN()
 
 
